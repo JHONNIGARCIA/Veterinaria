@@ -1,77 +1,54 @@
 <?php
-/**
- * Backend para consultar las citas registradas
- * Devuelve las citas en formato JSON
- */
-
 header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
+require __DIR__ . '/../connection/db_conexion.php';
 
-// Solo permitir GET para consultar
-if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-    http_response_code(405);
-    echo json_encode(['ok' => false, 'message' => 'Solo se permite GET para consultar citas']);
-    exit;
-}
-
-// Incluir la conexión a la base de datos
-require_once __DIR__ . '/../connection/db_conexion.php';
+$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
 try {
-    // Usar la conexión global
-    global $pdo;
-    
-    if (!($pdo instanceof PDO)) {
-        throw new Exception('No se pudo establecer conexión con la base de datos');
+  if ($method === 'GET') {
+    // Listar citas para registro.html
+    $limite = (int)($_GET['limite'] ?? 200);
+    $limite = max(1, min(500, $limite));
+
+    $q = $pdo->prepare(
+      "SELECT id_cita, raza_mascota, nombre_mascota, doctor, motivo, fecha_creacion
+       FROM citas
+       ORDER BY id_cita DESC
+       LIMIT ?"
+    );
+    $q->bindValue(1, $limite, PDO::PARAM_INT);
+    $q->execute();
+
+    echo json_encode(['ok'=>true, 'citas'=>$q->fetchAll(PDO::FETCH_ASSOC)], JSON_UNESCAPED_UNICODE);
+    exit;
+  }
+
+  if ($method === 'POST') {
+    // Guardar nueva cita (lo usa tu index.html)
+    $raza   = trim($_POST['raza_mascota']   ?? $_POST['raza']   ?? '');
+    $nombre = trim($_POST['nombre_mascota'] ?? $_POST['nombre'] ?? '');
+    $doctor = trim($_POST['doctor'] ?? '');
+    $motivo = trim($_POST['motivo'] ?? '');
+
+    if ($raza==='' || $nombre==='' || $doctor==='' || $motivo==='') {
+      http_response_code(400);
+      echo json_encode(['ok'=>false,'msg'=>'Faltan campos: raza, nombre, doctor y motivo son obligatorios.']);
+      exit;
     }
-    
-    // Consultar todas las citas ordenadas por fecha más reciente
-    $sql = "SELECT 
-                id_cita, 
-                raza_mascota, 
-                nombre_mascota, 
-                doctor, 
-                motivo, 
-                fecha_creacion 
-            FROM citas 
-            ORDER BY fecha_creacion DESC";
-    
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute();
-    $citas = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    // Verificar si hay citas
-    if (empty($citas)) {
-        echo json_encode([
-            'ok' => true,
-            'message' => 'No hay citas registradas',
-            'citas' => [],
-            'total' => 0
-        ]);
-    } else {
-        echo json_encode([
-            'ok' => true,
-            'message' => 'Citas cargadas exitosamente',
-            'citas' => $citas,
-            'total' => count($citas)
-        ]);
-    }
-    
-} catch (PDOException $e) {
-    http_response_code(500);
-    echo json_encode([
-        'ok' => false,
-        'message' => 'Error en la base de datos',
-        'error' => $e->getMessage()
-    ]);
-} catch (Exception $e) {
-    http_response_code(500);
-    echo json_encode([
-        'ok' => false,
-        'message' => 'Error del servidor',
-        'error' => $e->getMessage()
-    ]);
+
+    $stmt = $pdo->prepare(
+      "INSERT INTO citas (raza_mascota, nombre_mascota, doctor, motivo)
+       VALUES (?, ?, ?, ?)"
+    );
+    $stmt->execute([$raza, $nombre, $doctor, $motivo]);
+
+    echo json_encode(['ok'=>true,'msg'=>'Cita guardada','id'=>$pdo->lastInsertId()]);
+    exit;
+  }
+
+  http_response_code(405);
+  echo json_encode(['ok'=>false,'msg'=>'Método no permitido']);
+} catch (Throwable $e) {
+  http_response_code(500);
+  echo json_encode(['ok'=>false,'msg'=>'Error del servidor','error'=>$e->getMessage()]);
 }
-?>
