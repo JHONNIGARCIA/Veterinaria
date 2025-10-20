@@ -8,6 +8,12 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <!-- SweetAlert2 -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- jsPDF para generar PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- jsPDF AutoTable para tablas en PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  <!-- SheetJS para generar Excel -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     @keyframes fadeInUp { from { opacity:0; transform: translateY(30px);} to { opacity:1; transform: translateY(0);} }
     .fade-in-up{ animation: fadeInUp .6s ease-out forwards; }
@@ -31,10 +37,22 @@
           <p class="text-gray-600">Consulta todas las citas veterinarias registradas</p>
         </div>
         
-        <!-- Botón Nueva Cita -->
-        <a href="index.html" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-xl">
-          <i class="fas fa-plus mr-2"></i> Nueva Cita
-        </a>
+        <!-- Botones de acción -->
+        <div class="flex flex-wrap gap-3">
+          <!-- Botones de exportación -->
+          <button onclick="exportarPDF()" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-lg hover:from-red-600 hover:to-red-700 focus:outline-none focus:ring-4 focus:ring-red-300 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg">
+            <i class="fas fa-file-pdf mr-2"></i> PDF
+          </button>
+          
+          <button onclick="exportarExcel()" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-semibold rounded-lg hover:from-emerald-600 hover:to-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg">
+            <i class="fas fa-file-excel mr-2"></i> Excel
+          </button>
+          
+          <!-- Botón Nueva Cita -->
+          <a href="index.html" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-xl">
+            <i class="fas fa-plus mr-2"></i> Nueva Cita
+          </a>
+        </div>
       </div>
     </div>
 
@@ -50,12 +68,23 @@
       <!-- Contenido de la tabla -->
       <div id="tablaContainer" class="hidden">
         
-        <!-- Stats -->
+        <!-- Stats y Exportación -->
         <div class="bg-gradient-to-r from-teal-500 to-blue-600 p-6">
           <div class="flex justify-between items-center text-white">
             <div>
               <h3 class="text-lg font-semibold">Total de Citas</h3>
               <p id="totalCitas" class="text-3xl font-bold">0</p>
+            </div>
+            <div class="text-right">
+              <h3 class="text-lg font-semibold">Exportar datos</h3>
+              <div class="flex gap-2 mt-2">
+                <button onclick="exportarPDF()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                  <i class="fas fa-file-pdf mr-1"></i> PDF
+                </button>
+                <button onclick="exportarExcel()" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                  <i class="fas fa-file-excel mr-1"></i> Excel
+                </button>
+              </div>
             </div>
             <div class="text-right">
               <h3 class="text-lg font-semibold">Última actualización</h3>
@@ -159,6 +188,9 @@
     
     // Función para mostrar las citas en la tabla
     function mostrarCitas(citas) {
+      // Almacenar datos globalmente para exportación
+      citasData = citas;
+      
       const loading = document.getElementById('loading');
       const tablaContainer = document.getElementById('tablaContainer');
       const tablaCitas = document.getElementById('tablaCitas');
@@ -261,6 +293,130 @@
           // Aquí puedes agregar la lógica para eliminar de la BD
           setTimeout(() => cargarCitas(), 2000);
         }
+      });
+    }
+    
+    // Variable global para almacenar las citas
+    let citasData = [];
+    
+    // Función para exportar a PDF
+    function exportarPDF() {
+      if (citasData.length === 0) {
+        Swal.fire({
+          title: 'Sin datos',
+          text: 'No hay citas para exportar',
+          icon: 'warning',
+          confirmButtonColor: '#0d9488'
+        });
+        return;
+      }
+      
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      
+      // Título del documento
+      doc.setFontSize(20);
+      doc.setFont(undefined, 'bold');
+      doc.text('Registro de Citas Veterinarias', 20, 20);
+      
+      // Fecha de generación
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'normal');
+      doc.text(`Generado el: ${new Date().toLocaleString('es-ES')}`, 20, 30);
+      doc.text(`Total de citas: ${citasData.length}`, 20, 40);
+      
+      // Preparar datos para la tabla
+      const tableData = citasData.map(cita => [
+        `#${cita.id_cita}`,
+        cita.nombre_mascota,
+        cita.raza_mascota,
+        cita.doctor,
+        cita.motivo.substring(0, 50) + (cita.motivo.length > 50 ? '...' : ''),
+        new Date(cita.fecha_creacion).toLocaleDateString('es-ES')
+      ]);
+      
+      // Crear tabla
+      doc.autoTable({
+        startY: 50,
+        head: [['ID', 'Mascota', 'Raza', 'Doctor', 'Motivo', 'Fecha']],
+        body: tableData,
+        theme: 'striped',
+        styles: {
+          fontSize: 9,
+          cellPadding: 3,
+        },
+        headStyles: {
+          fillColor: [13, 148, 136], // Color teal
+          textColor: 255,
+          fontStyle: 'bold'
+        },
+        alternateRowStyles: {
+          fillColor: [240, 253, 250] // Color teal muy claro
+        }
+      });
+      
+      // Guardar el PDF
+      doc.save(`citas_veterinarias_${new Date().toISOString().split('T')[0]}.pdf`);
+      
+      Swal.fire({
+        title: '¡PDF generado!',
+        text: 'El archivo PDF se ha descargado exitosamente',
+        icon: 'success',
+        confirmButtonColor: '#0d9488',
+        timer: 2000
+      });
+    }
+    
+    // Función para exportar a Excel
+    function exportarExcel() {
+      if (citasData.length === 0) {
+        Swal.fire({
+          title: 'Sin datos',
+          text: 'No hay citas para exportar',
+          icon: 'warning',
+          confirmButtonColor: '#0d9488'
+        });
+        return;
+      }
+      
+      // Preparar datos para Excel
+      const excelData = citasData.map(cita => ({
+        'ID': cita.id_cita,
+        'Nombre de Mascota': cita.nombre_mascota,
+        'Raza': cita.raza_mascota,
+        'Doctor': cita.doctor,
+        'Motivo de la Visita': cita.motivo,
+        'Fecha de Creación': new Date(cita.fecha_creacion).toLocaleString('es-ES')
+      }));
+      
+      // Crear workbook y worksheet
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(excelData);
+      
+      // Configurar ancho de columnas
+      const colWidths = [
+        { wch: 8 },  // ID
+        { wch: 20 }, // Nombre
+        { wch: 15 }, // Raza
+        { wch: 15 }, // Doctor
+        { wch: 40 }, // Motivo
+        { wch: 20 }  // Fecha
+      ];
+      ws['!cols'] = colWidths;
+      
+      // Agregar hoja al workbook
+      XLSX.utils.book_append_sheet(wb, ws, 'Citas Veterinarias');
+      
+      // Guardar archivo
+      const fileName = `citas_veterinarias_${new Date().toISOString().split('T')[0]}.xlsx`;
+      XLSX.writeFile(wb, fileName);
+      
+      Swal.fire({
+        title: '¡Excel generado!',
+        text: 'El archivo Excel se ha descargado exitosamente',
+        icon: 'success',
+        confirmButtonColor: '#0d9488',
+        timer: 2000
       });
     }
     
