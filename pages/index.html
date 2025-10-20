@@ -1,74 +1,108 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulario de Cita Veterinaria</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        /* Custom animations */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .fade-in-up {
-            animation: fadeInUp 0.6s ease-out forwards;
-        }
-        .delay-1 { animation-delay: 0.1s; }
-        .delay-2 { animation-delay: 0.2s; }
-        .delay-3 { animation-delay: 0.3s; }
-        .delay-4 { animation-delay: 0.4s; }
-        .delay-5 { animation-delay: 0.5s; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Formulario de Cita Veterinaria</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    @keyframes fadeInUp { from { opacity:0; transform: translateY(30px);} to { opacity:1; transform: translateY(0);} }
+    .fade-in-up{ animation: fadeInUp .6s ease-out forwards; }
+    .delay-1{animation-delay:.1s}.delay-2{animation-delay:.2s}.delay-3{animation-delay:.3s}
+    .delay-4{animation-delay:.4s}.delay-5{animation-delay:.5s}
+  </style>
 </head>
 <body class="bg-gradient-to-br from-teal-100 via-blue-50 to-green-100 min-h-screen flex items-center justify-center p-4">
-    <div class="bg-white p-10 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-200 fade-in-up">
-        <div class="text-center mb-8">
-            <i class="fas fa-paw text-4xl text-teal-500 mb-4 animate-bounce"></i>
-            <h1 class="text-4xl font-extrabold text-gray-800 bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent">Formulario de Cita Veterinaria</h1>
-            <p class="text-gray-600 mt-2">Cuida a tu mascota con nosotros</p>
-        </div>
-        <form action="#" method="post" class="space-y-6">
-            <div class="fade-in-up delay-1">
-                <label for="raza" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                    <i class="fas fa-dog text-teal-500 mr-2"></i> Raza de la Mascota:
-                </label>
-                <input type="text" id="raza" name="raza" class="mt-1 block w-full px-4 py-3 border-2 border-teal-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-300 hover:shadow-md" required>
-            </div>
-
-            <div class="fade-in-up delay-2">
-                <label for="nombre" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                    <i class="fas fa-heart text-pink-500 mr-2"></i> Nombre de la Mascota:
-                </label>
-                <input type="text" id="nombre" name="nombre" class="mt-1 block w-full px-4 py-3 border-2 border-pink-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all duration-300 hover:shadow-md" required>
-            </div>
-
-            <div class="fade-in-up delay-3">
-                <label for="doctor" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                    <i class="fas fa-user-md text-blue-500 mr-2"></i> Doctor que Atiende:
-                </label>
-                <select id="doctor" name="doctor" class="mt-1 block w-full px-4 py-3 border-2 border-blue-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 hover:shadow-md" required>
-                    <option value="">Selecciona un doctor</option>
-                    <option value="Dr. García">Dr. García</option>
-                    <option value="Dra. López">Dra. López</option>
-                    <option value="Dr. Martínez">Dr. Martínez</option>
-                </select>
-            </div>
-
-            <div class="fade-in-up delay-4">
-                <label for="motivo" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                    <i class="fas fa-clipboard-list text-green-500 mr-2"></i> Motivo de la Visita:
-                </label>
-                <textarea id="motivo" name="motivo" rows="4" class="mt-1 block w-full px-4 py-3 border-2 border-green-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300 hover:shadow-md" required></textarea>
-            </div>
-
-            <div class="fade-in-up delay-5">
-                <button type="submit" class="w-full bg-gradient-to-r from-teal-500 via-blue-500 to-green-500 text-white py-4 px-6 rounded-xl hover:from-teal-600 hover:via-blue-600 hover:to-green-600 focus:outline-none focus:ring-4 focus:ring-teal-300 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-xl flex items-center justify-center">
-                    <i class="fas fa-paper-plane mr-2"></i> Enviar Cita
-                </button>
-            </div>
-        </form>
+  <div class="bg-white p-10 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-200 fade-in-up">
+    <div class="text-center mb-8">
+      <i class="fas fa-paw text-4xl text-teal-500 mb-4 animate-bounce"></i>
+      <h1 class="text-4xl font-extrabold text-gray-800 bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent">
+        Formulario de Cita Veterinaria
+      </h1>
+      <p class="text-gray-600 mt-2">Cuida a tu mascota con nosotros</p>
     </div>
+
+    <!-- SIN redirección: procesaremos por JS -->
+    <form id="formCita" class="space-y-6" autocomplete="off">
+      <div class="fade-in-up delay-1">
+        <label for="raza" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+          <i class="fas fa-dog text-teal-500 mr-2"></i> Raza de la Mascota:
+        </label>
+        <input type="text" id="raza" name="raza"
+               class="mt-1 block w-full px-4 py-3 border-2 border-teal-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-300 hover:shadow-md"
+               required>
+      </div>
+
+      <div class="fade-in-up delay-2">
+        <label for="nombre" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+          <i class="fas fa-heart text-pink-500 mr-2"></i> Nombre de la Mascota:
+        </label>
+        <input type="text" id="nombre" name="nombre"
+               class="mt-1 block w-full px-4 py-3 border-2 border-pink-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all duration-300 hover:shadow-md"
+               required>
+      </div>
+
+      <div class="fade-in-up delay-3">
+        <label for="doctor" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+          <i class="fas fa-user-md text-blue-500 mr-2"></i> Doctor que Atiende:
+        </label>
+        <select id="doctor" name="doctor"
+                class="mt-1 block w-full px-4 py-3 border-2 border-blue-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 hover:shadow-md"
+                required>
+          <option value="">Selecciona un doctor</option>
+          <option value="Dr. García">Dr. García</option>
+          <option value="Dra. López">Dra. López</option>
+          <option value="Dr. Martínez">Dr. Martínez</option>
+        </select>
+      </div>
+
+      <div class="fade-in-up delay-4">
+        <label for="motivo" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+          <i class="fas fa-clipboard-list text-green-500 mr-2"></i> Motivo de la Visita:
+        </label>
+        <textarea id="motivo" name="motivo" rows="4"
+                  class="mt-1 block w-full px-4 py-3 border-2 border-green-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-300 hover:shadow-md"
+                  required></textarea>
+      </div>
+
+      <div class="fade-in-up delay-5">
+        <button type="submit"
+                class="w-full bg-gradient-to-r from-teal-500 via-blue-500 to-green-500 text-white py-4 px-6 rounded-xl hover:from-teal-600 hover:via-blue-600 hover:to-green-600 focus:outline-none focus:ring-4 focus:ring-teal-300 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-xl flex items-center justify-center">
+          <i class="fas fa-paper-plane mr-2"></i> Enviar Cita
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+  const form = document.getElementById('formCita');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault(); // evita navegar
+    const btn = form.querySelector('button[type="submit"]');
+    btn.disabled = true; btn.classList.add('opacity-60','cursor-not-allowed');
+
+    try {
+      const res  = await fetch('../php/index.php', {
+        method: 'POST',
+        body: new FormData(form)
+      });
+      const json = await res.json();
+
+      if (json.ok) {
+        Swal.fire({icon:'success', title:'¡Cita registrada!', text: json.message || 'Se guardó correctamente.'});
+        form.reset();
+      } else {
+        Swal.fire({icon:'warning', title:'Atención', text: json.message || 'Revisa los campos.'});
+      }
+    } catch (err) {
+      Swal.fire({icon:'error', title:'Error del servidor', text: err.message});
+    } finally {
+      btn.disabled = false; btn.classList.remove('opacity-60','cursor-not-allowed');
+    }
+  });
+  </script>
 </body>
 </html>
