@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Registro de Citas - Veterinaria</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    @keyframes fadeInUp { from { opacity:0; transform: translateY(30px);} to { opacity:1; transform: translateY(0);} }
+    .fade-in-up{ animation: fadeInUp .6s ease-out forwards; }
+    .delay-1{animation-delay:.1s}.delay-2{animation-delay:.2s}.delay-3{animation-delay:.3s}
+    .delay-4{animation-delay:.4s}.delay-5{animation-delay:.5s}
+  </style>
+</head>
+<body class="bg-gradient-to-br from-teal-100 via-blue-50 to-green-100 min-h-screen p-4">
+  <div class="container mx-auto max-w-6xl">
+    
+    <!-- Header -->
+    <div class="bg-white rounded-2xl shadow-2xl p-8 mb-6 fade-in-up">
+      <div class="flex justify-between items-center">
+        <div>
+          <div class="flex items-center mb-2">
+            <i class="fas fa-calendar-alt text-4xl text-teal-500 mr-4"></i>
+            <h1 class="text-4xl font-extrabold text-gray-800 bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent">
+              Registro de Citas
+            </h1>
+          </div>
+          <p class="text-gray-600">Consulta todas las citas veterinarias registradas</p>
+        </div>
+        
+        <!-- Botón Nueva Cita -->
+        <a href="index.html" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-xl">
+          <i class="fas fa-plus mr-2"></i> Nueva Cita
+        </a>
+      </div>
+    </div>
+
+    <!-- Contenedor de la tabla -->
+    <div class="bg-white rounded-2xl shadow-2xl overflow-hidden fade-in-up delay-1">
+      
+      <!-- Loading -->
+      <div id="loading" class="text-center py-12">
+        <i class="fas fa-spinner fa-spin text-4xl text-teal-500 mb-4"></i>
+        <p class="text-gray-600">Cargando citas...</p>
+      </div>
+
+      <!-- Contenido de la tabla -->
+      <div id="tablaContainer" class="hidden">
+        
+        <!-- Stats -->
+        <div class="bg-gradient-to-r from-teal-500 to-blue-600 p-6">
+          <div class="flex justify-between items-center text-white">
+            <div>
+              <h3 class="text-lg font-semibold">Total de Citas</h3>
+              <p id="totalCitas" class="text-3xl font-bold">0</p>
+            </div>
+            <div class="text-right">
+              <h3 class="text-lg font-semibold">Última actualización</h3>
+              <p id="ultimaActualizacion" class="text-sm opacity-90">-</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabla -->
+        <div class="overflow-x-auto">
+          <table class="min-w-full">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <i class="fas fa-hashtag mr-1"></i> ID
+                </th>
+                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <i class="fas fa-paw mr-1"></i> Mascota
+                </th>
+                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <i class="fas fa-dog mr-1"></i> Raza
+                </th>
+                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <i class="fas fa-user-md mr-1"></i> Doctor
+                </th>
+                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <i class="fas fa-clipboard-list mr-1"></i> Motivo
+                </th>
+                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <i class="fas fa-clock mr-1"></i> Fecha
+                </th>
+                <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <i class="fas fa-cogs mr-1"></i> Acciones
+                </th>
+              </tr>
+            </thead>
+            <tbody id="tablaCitas" class="bg-white divide-y divide-gray-200">
+              <!-- Las filas se llenarán dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Sin datos -->
+      <div id="sinDatos" class="hidden text-center py-12">
+        <i class="fas fa-calendar-times text-6xl text-gray-400 mb-4"></i>
+        <h3 class="text-xl font-semibold text-gray-600 mb-2">No hay citas registradas</h3>
+        <p class="text-gray-500 mb-6">Registra la primera cita para comenzar</p>
+        <a href="index.html" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-teal-500 to-blue-600 text-white font-semibold rounded-xl hover:from-teal-600 hover:to-blue-700 transition-all duration-300">
+          <i class="fas fa-plus mr-2"></i> Registrar Primera Cita
+        </a>
+      </div>
+
+      <!-- Error -->
+      <div id="errorContainer" class="hidden text-center py-12">
+        <i class="fas fa-exclamation-triangle text-6xl text-red-400 mb-4"></i>
+        <h3 class="text-xl font-semibold text-red-600 mb-2">Error al cargar las citas</h3>
+        <p id="errorMessage" class="text-gray-500 mb-6">Hubo un problema al conectar con el servidor</p>
+        <button onclick="cargarCitas()" class="inline-flex items-center px-6 py-3 bg-red-500 text-white font-semibold rounded-xl hover:bg-red-600 transition-all duration-300">
+          <i class="fas fa-redo mr-2"></i> Reintentar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Función para cargar las citas
+    async function cargarCitas() {
+      const loading = document.getElementById('loading');
+      const tablaContainer = document.getElementById('tablaContainer');
+      const sinDatos = document.getElementById('sinDatos');
+      const errorContainer = document.getElementById('errorContainer');
+      
+      // Mostrar loading
+      loading.classList.remove('hidden');
+      tablaContainer.classList.add('hidden');
+      sinDatos.classList.add('hidden');
+      errorContainer.classList.add('hidden');
+      
+      try {
+        const response = await fetch('../php/registro.php');
+        const data = await response.json();
+        
+        if (data.ok) {
+          if (data.citas && data.citas.length > 0) {
+            mostrarCitas(data.citas);
+          } else {
+            loading.classList.add('hidden');
+            sinDatos.classList.remove('hidden');
+          }
+        } else {
+          throw new Error(data.message || 'Error al cargar las citas');
+        }
+        
+      } catch (error) {
+        loading.classList.add('hidden');
+        errorContainer.classList.remove('hidden');
+        document.getElementById('errorMessage').textContent = error.message;
+      }
+    }
+    
+    // Función para mostrar las citas en la tabla
+    function mostrarCitas(citas) {
+      const loading = document.getElementById('loading');
+      const tablaContainer = document.getElementById('tablaContainer');
+      const tablaCitas = document.getElementById('tablaCitas');
+      const totalCitas = document.getElementById('totalCitas');
+      const ultimaActualizacion = document.getElementById('ultimaActualizacion');
+      
+      // Actualizar stats
+      totalCitas.textContent = citas.length;
+      ultimaActualizacion.textContent = new Date().toLocaleString('es-ES');
+      
+      // Limpiar tabla
+      tablaCitas.innerHTML = '';
+      
+      // Llenar tabla
+      citas.forEach((cita, index) => {
+        const fila = document.createElement('tr');
+        fila.className = 'hover:bg-gray-50 transition-colors';
+        
+        fila.innerHTML = `
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+            <span class="bg-teal-100 text-teal-800 px-3 py-1 rounded-full text-xs font-semibold">#${cita.id_cita}</span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="flex items-center">
+              <div class="bg-pink-100 p-2 rounded-full mr-3">
+                <i class="fas fa-heart text-pink-500"></i>
+              </div>
+              <span class="text-sm font-medium text-gray-900">${cita.nombre_mascota}</span>
+            </div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${cita.raza_mascota}</td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="flex items-center">
+              <div class="bg-blue-100 p-2 rounded-full mr-3">
+                <i class="fas fa-user-md text-blue-500"></i>
+              </div>
+              <span class="text-sm text-gray-900">${cita.doctor}</span>
+            </div>
+          </td>
+          <td class="px-6 py-4 text-sm text-gray-900 max-w-xs">
+            <div class="truncate" title="${cita.motivo}">${cita.motivo}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            <div class="flex items-center">
+              <i class="fas fa-calendar text-gray-400 mr-1"></i>
+              ${new Date(cita.fecha_creacion).toLocaleString('es-ES')}
+            </div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+            <button onclick="verDetalle(${cita.id_cita})" 
+                    class="text-teal-600 hover:text-teal-900 mr-3 transition-colors">
+              <i class="fas fa-eye"></i>
+            </button>
+            <button onclick="eliminarCita(${cita.id_cita}, '${cita.nombre_mascota}')" 
+                    class="text-red-600 hover:text-red-900 transition-colors">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        `;
+        
+        tablaCitas.appendChild(fila);
+      });
+      
+      // Mostrar tabla
+      loading.classList.add('hidden');
+      tablaContainer.classList.remove('hidden');
+    }
+    
+    // Función para ver detalle de una cita
+    function verDetalle(idCita) {
+      Swal.fire({
+        title: 'Detalle de la Cita',
+        text: `Mostrando información completa de la cita #${idCita}`,
+        icon: 'info',
+        confirmButtonText: 'Cerrar',
+        confirmButtonColor: '#0d9488'
+      });
+    }
+    
+    // Función para eliminar una cita
+    function eliminarCita(idCita, nombreMascota) {
+      Swal.fire({
+        title: '¿Eliminar cita?',
+        text: `¿Estás seguro de eliminar la cita de ${nombreMascota}?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          Swal.fire({
+            title: 'Eliminado!',
+            text: 'La cita ha sido eliminada.',
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false
+          });
+          // Aquí puedes agregar la lógica para eliminar de la BD
+          setTimeout(() => cargarCitas(), 2000);
+        }
+      });
+    }
+    
+    // Cargar citas al cargar la página
+    document.addEventListener('DOMContentLoaded', cargarCitas);
+  </script>
+</body>
+</html>
